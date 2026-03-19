@@ -449,6 +449,27 @@ show_summary() {
     cat "$SUMMARY_FILE"
 }
 
+maybe_run_usb_mount_blocker() {
+    local blocker_script="${SCRIPT_DIR}/usb-mount-blocker/usb_mount_blocker.sh"
+    local reply
+
+    [ -t 0 ] || return 0
+    [ -x "$blocker_script" ] || return 0
+
+    print_header "USB Mount Blocker"
+    printf 'Do you want to block some USB devices from automount now? (yes/no): '
+    read -r reply
+
+    case "${reply,,}" in
+        y|yes)
+            "$blocker_script" block
+            ;;
+        *)
+            print_info "Skipping USB device blocking."
+            ;;
+    esac
+}
+
 run_modules() {
     local -a modules=(
         install_nemo_bundle
@@ -473,6 +494,7 @@ run_install() {
     setup_autostart
     write_summary
     show_summary
+    maybe_run_usb_mount_blocker
     print_info ""
     print_info "Next:"
     print_info "- Review config: ${RESTORE_CONFIG}"

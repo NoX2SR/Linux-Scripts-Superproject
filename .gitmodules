@@ -7,3 +7,6 @@
 [submodule "nemo_actions_and_cinnamon_scripts"]
 	path = nemo_actions_and_cinnamon_scripts
 	url = https://github.com/smurphos/nemo_actions_and_cinnamon_scripts
+[submodule "usb-mount-blocker"]
+	path = usb-mount-blocker
+	url = https://github.com/NoX2SR/usb-mount-blocker.git
