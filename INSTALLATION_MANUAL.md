@@ -44,6 +44,7 @@ The autostart entries take effect on the next session.
 - Function: Watches display changes and reapplies wallpapers
 - Config: `~/.config/monitor_wallpapers.conf`
 - Autostart: `~/.config/autostart/linux-scripts-monitor-wallpapers.desktop`
+- Trigger settings: stored in `~/.config/linux-scripts/restore.conf`
 
 ### 5. Conky bundle
 - Location: `~/.config/conky/`
@@ -142,6 +143,31 @@ nano ~/.local/bin/linux-screensaver-quote-updater/quotes.json
 nano ~/.config/monitor_wallpapers.conf
 ```
 
+Monitor trigger options in `~/.config/linux-scripts/restore.conf`:
+- `MONITOR_TRIGGER_MODE="xrandr_active_monitors"`
+- `MONITOR_TRIGGER_CONNECTOR=""`
+
+Supported trigger modes:
+- `xrandr_active_monitors`
+- `connector`
+- `xrandr_query`
+
+For KVM setups, the recommended first choice is:
+
+```bash
+MONITOR_TRIGGER_MODE="xrandr_active_monitors"
+```
+
+If you need to detect which trigger works on a new machine:
+
+```bash
+./INSTALL.sh detect-monitor-trigger
+```
+
+Then flip the KVM while the detector samples the session. It will print suggested values for:
+- `MONITOR_TRIGGER_MODE`
+- `MONITOR_TRIGGER_CONNECTOR`
+
 ### Configure installer behavior
 ```bash
 nano ~/.config/linux-scripts/restore.conf
@@ -182,6 +208,11 @@ rm ~/.config/autostart/linux-scripts-conky.desktop
 ./INSTALL.sh upgrade
 ```
 
+### Detect monitor trigger after install
+```bash
+./INSTALL.sh detect-monitor-trigger
+```
+
 ## Troubleshooting
 
 ### Conky does not start at login
@@ -197,3 +228,10 @@ rm ~/.config/autostart/linux-scripts-conky.desktop
 ### Fonts or symbols are missing
 - Check that the bundled fonts were copied into `~/.local/share/fonts`
 - Refresh the font cache with `fc-cache -f ~/.local/share/fonts`
+
+### Monitor wallpaper updater does not react to a KVM switch
+- Run `./INSTALL.sh detect-monitor-trigger`
+- Flip the KVM while it samples monitor state
+- Apply the suggested `MONITOR_TRIGGER_MODE` and `MONITOR_TRIGGER_CONNECTOR` values in `~/.config/linux-scripts/restore.conf`
+- Restart with `./INSTALL.sh upgrade`
+- Check `~/.local/share/monitor_displays.log` for `Display configuration changed!`

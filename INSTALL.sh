@@ -70,7 +70,7 @@ ENABLE_CONKY=true
 ENABLE_CONKY_AUTOSTART=true
 INSTALL_CONKY_FONTS=true
 INSTALL_GTK_OVERRIDE=false
-EDIT_CONFIG_ON_CREATE=true
+EDIT_CONFIG_ON_CREATE=false
 
 # Conky
 CONKY_WIRED_INTERFACE=""
@@ -92,6 +92,8 @@ WALLPAPER_RIGHT="/usr/share/backgrounds/xfce/xfce-verticals.jpg"
 WALLPAPER_SINGLE="/usr/share/backgrounds/xfce/xfce-teal.jpg"
 PICTURE_OPTIONS="zoom"
 MONITOR_POLL_INTERVAL=2
+MONITOR_TRIGGER_MODE="xrandr_active_monitors"
+MONITOR_TRIGGER_CONNECTOR=""
 EOF
 }
 
@@ -154,25 +156,53 @@ copy_tree_contents() {
     cp -a "$src"/. "$dest"/
 }
 
+cleanup_nemo_bundle_files() {
+    local nemo_root="${SCRIPT_DIR}/nemo_actions_and_cinnamon_scripts"
+    local path
+    local base
+
+    for path in "$nemo_root"/.local/share/nemo/actions/*.nemo_action; do
+        [ -f "$path" ] || continue
+        rm -f "$NEMO_ACTIONS_DIR/$(basename "$path")"
+    done
+
+    for path in "$nemo_root"/.local/share/nemo/actions/action_scripts/*; do
+        [ -f "$path" ] || continue
+        rm -f "$NEMO_ACTION_SCRIPTS_DIR/$(basename "$path")"
+    done
+
+    for path in "$nemo_root"/.local/bin/*.sh; do
+        [ -f "$path" ] || continue
+        base="$(basename "$path")"
+        [ "$base" = "lock_screen_slideshow.sh" ] && continue
+        rm -f "$LOCAL_BIN/$base"
+    done
+
+    rmdir "$NEMO_ACTION_SCRIPTS_DIR" 2>/dev/null || true
+}
+
 install_nemo_bundle() {
     [ "${INSTALL_NEMO_ACTIONS:-true}" = true ] || return 0
 
     local nemo_root="${SCRIPT_DIR}/nemo_actions_and_cinnamon_scripts"
-    local helper
     [ -d "$nemo_root" ] || die "Missing nemo_actions_and_cinnamon_scripts"
 
     print_header "Nemo Bundle"
 
-    print_step "Installing shell helpers"
-    copy_tree_contents "$nemo_root/.local/bin" "$LOCAL_BIN"
-    for helper in "$nemo_root"/.local/bin/*.sh; do
-        [ -f "$helper" ] || continue
-        chmod 755 "$LOCAL_BIN/$(basename "$helper")"
-    done
+    print_step "Removing bundled Nemo actions and extra helpers"
+    cleanup_nemo_bundle_files
 
-    print_step "Installing Nemo actions"
-    copy_tree_contents "$nemo_root/.local/share/nemo/actions" "$NEMO_ACTIONS_DIR"
-    find "$NEMO_ACTION_SCRIPTS_DIR" -type f -exec chmod 755 {} +
+    print_step "Installing lock screen slideshow helper"
+    install -m 755 "$nemo_root/.local/bin/lock_screen_slideshow.sh" "$LOCAL_BIN/lock_screen_slideshow.sh"
+
+    print_step "Integrating quote updater with slideshow script"
+    if [ -n "${QUOTE_UPDATER_CMD:-}" ]; then
+        sed -i '/gsettings set org.cinnamon.desktop.background picture-options "\$DESK_MODE"/a \
+      # Update lock screen quote\n\
+      if command -v "'"$QUOTE_UPDATER_CMD"'" >/dev/null 2>&1; then\n\
+        "'"$QUOTE_UPDATER_CMD"'"\n\
+      fi' "$LOCAL_BIN/lock_screen_slideshow.sh"
+    fi
 
     if [ "${INSTALL_GTK_OVERRIDE:-false}" = true ] && [ -f "$nemo_root/.config/gtk-3.0/gtk.css" ]; then
         print_step "Installing GTK override"
@@ -204,8 +234,18 @@ install_monitor_updater() {
     install -m 755 "$source_dir/monitor_displays.sh" "$LOCAL_BIN/monitor_displays.sh"
     install -m 755 "$source_dir/xrandr_event_monitor.sh" "$LOCAL_BIN/xrandr_event_monitor.sh"
     install -m 755 "$source_dir/display_monitor.py" "$LOCAL_BIN/display_monitor.py"
+    install -m 755 "$source_dir/setup_monitor_wallpapers.sh" "$LOCAL_BIN/setup_monitor_wallpapers.sh"
 
     ln -sfn "$RESTORE_CONFIG" "$LEGACY_MONITOR_CONFIG"
+}
+
+detect_monitor_trigger() {
+    [ "${ENABLE_MONITOR_UPDATER:-true}" = true ] || die "Monitor updater is disabled in config."
+    [ -x "$LOCAL_BIN/monitor_displays.sh" ] || die "Install the monitor updater first."
+
+    print_header "Monitor Trigger Detection"
+    print_info "Flip the KVM while the detector samples monitor state."
+    "$LOCAL_BIN/monitor_displays.sh" detect-trigger "${1:-20}" "${2:-1}"
 }
 
 detect_default_interface() {
@@ -447,6 +487,7 @@ Usage: $(basename "$0") [command]
 Commands:
   install   Full restore flow (default)
   upgrade   Re-run install steps using existing config
+  detect-monitor-trigger  Sample monitor signals while you switch the KVM
   deps      Install apt dependencies only
   config    Open shared config
   summary   Show last install summary
@@ -469,6 +510,13 @@ main() {
             ensure_config
             load_config
             install_apt_dependencies
+            ;;
+        detect-monitor-trigger)
+            ensure_directories
+            ensure_config
+            load_config
+            install_monitor_updater
+            detect_monitor_trigger "${2:-20}" "${3:-1}"
             ;;
         config)
             ensure_directories
