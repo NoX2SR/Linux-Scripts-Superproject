@@ -1,0 +1,9 @@
+[submodule "linux-screensaver-quote-updater"]
+	path = linux-screensaver-quote-updater
+	url = https://github.com/NoX2SR/linux-screensaver-quote-updater
+[submodule "MyConkyConfigs"]
+	path = MyConkyConfigs
+	url = https://github.com/NoX2SR/MyConkyConfigs
+[submodule "nemo_actions_and_cinnamon_scripts"]
+	path = nemo_actions_and_cinnamon_scripts
+	url = https://github.com/smurphos/nemo_actions_and_cinnamon_scripts
