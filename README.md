@@ -51,6 +51,6 @@ monitor-wallpaper-updater/monitor_displays.sh daemon
 ## Notes
 
 - The monitor updater uses `gsettings` and `xrandr`.
-- Different wallpapers per monitor usually require `feh`.
+- The monitor updater now switches between `WALLPAPER_SINGLE` and `WALLPAPER_DUAL`.
 - The Conky installer creates `~/.config/autostart/linux-scripts-conky.desktop`.
 - Conky network interface names can be overridden in `~/.config/linux-scripts/restore.conf`.

@@ -114,6 +114,7 @@ cat << 'EOF'
 
   "How do I set wallpaper paths?"
     → nano ~/.config/monitor_wallpapers.conf
+    → Set WALLPAPER_SINGLE and WALLPAPER_DUAL
     → ~/Documents/Linux/Scripts/monitor-wallpaper-updater/monitor_displays.sh config
 
   "How do I test it?"

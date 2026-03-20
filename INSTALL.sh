@@ -21,7 +21,7 @@ CONKY_AUTOSTART_FILE="${AUTOSTART_DIR}/linux-scripts-conky.desktop"
 
 CORE_APT_PACKAGES=(python3 x11-xserver-utils dbus-x11)
 NEMO_APT_PACKAGES=(zenity xdotool wmctrl mediainfo-gui shellcheck imagemagick)
-MONITOR_APT_PACKAGES=(feh)
+MONITOR_APT_PACKAGES=()
 CONKY_APT_PACKAGES=(conky-all jq curl net-tools lm-sensors mesa-utils bc)
 
 print_header() {
@@ -87,9 +87,8 @@ LOCK_SCREEN_INDEX_FILE="\${HOME}/.config/smurphos_lock_screen_index"
 QUOTE_UPDATER_CMD="\${HOME}/.local/bin/linux-screensaver-quote-updater/lock_screen_updater"
 
 # Monitor wallpapers
-WALLPAPER_LEFT="/usr/share/backgrounds/xfce/xfce-teal.jpg"
-WALLPAPER_RIGHT="/usr/share/backgrounds/xfce/xfce-verticals.jpg"
 WALLPAPER_SINGLE="/usr/share/backgrounds/xfce/xfce-teal.jpg"
+WALLPAPER_DUAL="/usr/share/backgrounds/xfce/xfce-teal.jpg"
 PICTURE_OPTIONS="zoom"
 MONITOR_POLL_INTERVAL=2
 MONITOR_TRIGGER_MODE="xrandr_active_monitors"

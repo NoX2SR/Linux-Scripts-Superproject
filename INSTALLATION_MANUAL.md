@@ -68,9 +68,6 @@ The autostart entries take effect on the next session.
 - `shellcheck`
 - `imagemagick`
 
-### Monitor wallpaper updater
-- `feh`
-
 ### Conky bundle
 - `conky-all`
 - `jq`
@@ -142,6 +139,10 @@ nano ~/.local/bin/linux-screensaver-quote-updater/quotes.json
 ```bash
 nano ~/.config/monitor_wallpapers.conf
 ```
+
+Wallpaper image settings:
+- `WALLPAPER_SINGLE="/path/to/single-monitor-image.png"`
+- `WALLPAPER_DUAL="/path/to/dual-monitor-image.png"`
 
 Monitor trigger options in `~/.config/linux-scripts/restore.conf`:
 - `MONITOR_TRIGGER_MODE="xrandr_active_monitors"`
